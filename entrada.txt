@@ -1,0 +1,15 @@
+int somar(int a, int b) {
+    int soma = a + b;
+    retour soma;
+}
+
+int x = 10;
+int y = 5;
+
+int result = somar(x, y);
+
+si (result > 10) {
+    result = result - 10;
+} sinon {
+    result = 0;
+}
