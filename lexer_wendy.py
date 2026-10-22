@@ -127,9 +127,7 @@ DELIMITADORES: dict[str, str] = {
     "{": "LEF_KEY",
     "}": "RIG_KEY",
     ";": "COLON",
-    # ",": "VIRGULA",
-    # "[": "COLC_ESQ",
-    # "]": "COLC_DIR",
+    ",": "COMMA",
 }
 
 # Tabela combinada (operadores + símbolos). Usada no trie e na
