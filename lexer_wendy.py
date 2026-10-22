@@ -56,14 +56,13 @@ class AFD:
         #raise NotImplementedError
 
     def marcar_final(self, estado: int) -> None:
-        """TODO 2: adicione `estado` a self.finais."""
+        """Adiciona `estado` ao conjunto de estados finais."""
         self.finais.add(estado)
         #raise NotImplementedError
 
     def maior_prefixo(self, texto: str) -> int:
-        """TODO 3: retorne o comprimento do MAIOR prefixo de `texto`
+        """Retorna o comprimento do MAIOR prefixo de `texto`
         aceito pelo AFD, ou -1 se nenhum prefixo for aceito.
-        Esqueleto:
         """
         estado = self.inicial
         ultimo = 0 if estado in self.finais else -1
@@ -82,7 +81,6 @@ class AFD:
 # =====================================================================
 # 3. CONFIGURAÇÃO DA LINGUAGEM
 # ---------------------------------------------------------------------
-# Edite APENAS esta seção para adaptar o lexer à sua linguagem.
 # =====================================================================
 
 # --- Alfabeto de identificadores -----------------------------------
@@ -92,6 +90,9 @@ CONTINUACAO_ID  = LETRAS_ID + "0123456789_"      # caracteres seguintes
 
 # --- Dígitos (para números) -----------------------------------------
 DIGITOS = "0123456789"
+
+# --- Espaços em branco ignorados ------------------------------------
+ESPACOS = " \t\r\n"
 
 # --- Palavras reservadas: lexema -> tipo ---------------------------
 # Reclassificadas a partir de tokens ID.
@@ -126,7 +127,61 @@ DELIMITADORES: dict[str, str] = {
     ")": "RIG_PAR",
     "{": "LEF_KEY",
     "}": "RIG_KEY",
-    ";": "COLON",
+    ";": "SEMICOL",
+    ",": "COMMA",
+}
+
+# --- Comentário 
+COMENT = "//"
+COMENT_BLOCK = ("/*", "*/")
+
+PALAVRAS_RESERVADAS: dict[str, str] = {
+    # Estruturas
+    "si":     "IF",
+    "sinon":  "ELSE",
+    "tant":   "WHILE",
+    "retour": "RETURN",
+    
+    # Tipos primitivos e  literais
+    "int":    "TP_INT",
+    "float":  "TP_FLOAT",
+    "void":   "TP_VOID",
+    "bool":   "TP_BOOL",
+    "vrai":   "BOOL_LIT",
+    "faux":   "BOOL_LIT",
+}
+
+
+OPERADORES: dict[str, str] = {
+    # Atribuição 
+    "=":  "ASSIG",
+    
+    #Operadores aritméticos
+    "+":  "SUM",
+    "-":  "SUB",
+    "*":  "MULT",
+    "/":  "DIV",
+    
+    # Operadores relacionais 
+    "==": "EQ",
+    "!=": "NE",
+    "<=": "LE",
+    ">=": "GE",
+    "<":  "LT",
+    ">":  "GT",
+    
+    # Lógicos
+    "&&": "AND",
+    "||": "OR",
+}
+
+
+DELIMITADORES: dict[str, str] = {
+    "(": "LEF_PAR",
+    ")": "RIG_PAR",
+    "{": "LEF_KEY",
+    "}": "RIG_KEY",
+    ";": "SEMICOL",
     ",": "COMMA",
 }
 
@@ -218,8 +273,7 @@ def afd_numero() -> AFD:
     Para hexadecimal, aceite o prefixo '0x' e A-F em DIGITOS.
     """
     afd = AFD("NUM")
-    # TODO 7:
-    q1 = afd.novo_estado()
+    q1 = afd.novo_estado()   # parte inteira 
     q2 = afd.novo_estado()   # leu o .
     q3 = afd.novo_estado()   # parte decimal
     afd.transicao(afd.inicial, DIGITOS, q1)
@@ -260,7 +314,6 @@ class Lexer:
           - ID   -> palavra reservada, se aplicável
           - FIXO -> operador ou símbolo específico
         """
-        # TODO 8:
         if tipo == "ID" and valor in PALAVRAS_RESERVADAS:
             return PALAVRAS_RESERVADAS[valor]
         if tipo == "NUM":
@@ -271,8 +324,7 @@ class Lexer:
 
     def proximo_token(self) -> Token | None:
         # 1) pular espaços em branco
-        while self.pos < len(self.entrada) and self.entrada[self.pos] in " \t\r\n":
-            self._avancar(1)
+        self.ignorar_coments()
         if self.pos >= len(self.entrada):
             return None
 
@@ -300,18 +352,36 @@ class Lexer:
         melhor_tipo = self._reclassificar(melhor_tipo, valor)
 
         return Token(melhor_tipo, valor, linha, coluna)
+    
+
+    # COMENTÁRIO 
+    # O laço
+    # repete até não haver mais nada a pular, então sequências como
+    # "  // a \n /* b */  x" são tratadas.
+    def ignorar_coments(self) -> None:
+        abre_bloco, fecha_bloco = COMENT_BLOCK
+        while self.pos < len(self.entrada):
+            c = self.entrada[self.pos]
+            if c in ESPACOS:
+                self._avancar(1)
+            elif self.entrada.startswith(COMENT, self.pos):
+                fim = self.entrada.find("\n", self.pos)
+                if fim == -1:
+                    fim = len(self.entrada)
+                self._avancar(fim - self.pos)
+            elif self.entrada.startswith(abre_bloco, self.pos):
+                linha, coluna = self.linha, self.coluna
+                fim = self.entrada.find(fecha_bloco, self.pos + len(abre_bloco))
+                self._avancar(fim + len(fecha_bloco) - self.pos)
+            else:
+                return
+
 
     def tokenizar(self) -> list[Token]:
-        """TODO 9: laço trivial chamando proximo_token()."""
         tokens: list[Token] = []
         while (tok := self.proximo_token()) is not None:
-            if tok.tipo == "IF" and tokens and tokens[-1].tipo == "ELSE":
-                anterior = tokens.pop()
-                tok = Token("ELSE-IF", "sinon si", anterior.linha, anterior.coluna)
             tokens.append(tok)
         return tokens
-
-
 # =====================================================================
 # 7. PROGRAMA PRINCIPAL
 # =====================================================================
@@ -328,7 +398,6 @@ def construir_regras() -> list[tuple[str, AFD]]:
     ]
 
 
-#segunda coluna vira linha única
 def main() -> None:
     if len(sys.argv) > 1:
         with open(sys.argv[1], "r", encoding="utf-8") as f:
@@ -338,10 +407,8 @@ def main() -> None:
 
     tokens = Lexer(codigo, construir_regras()).tokenizar()
 
-    print(f"{'TEXTO':<12} {'TOKEN':<10}")
-    print("-" * 22) #22 
-    for tok in tokens:
-        print(f"{tok.valor:<12} {tok.tipo:<10}")
+    # Sequência de tipos em uma linha, separados por espaço, para o ANTLR
+    print(" ".join(tok.tipo for tok in tokens))
 
 
 if __name__ == "__main__":

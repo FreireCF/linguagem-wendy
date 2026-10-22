@@ -8,12 +8,12 @@ program:
     ;
 
 
-functDecl
-    : (type) ID LEF_PAR params? RIG_PAR block
+functDecl: 
+    (type | TP_VOID) ID LEF_PAR params? RIG_PAR block
     ;
 
 
-// Um comando pode ser declaração de variável, if, while, bloco ou expressão
+// Um comando pode ser declaração de variável, if, while, bloco, expressão ou retornno
 statement:
     varDecl
     | ifStmt
@@ -26,19 +26,19 @@ statement:
 
 // Declaração de variável: tipo nome (= valor)? ;
 varDecl:
-    type ID (ASSIG expr)? COLON
+    type ID (ASSIG expr)? SEMICOL
     ;
 
 
 // Tipos básicos suportados
 type:
-    TP_INT | TP_FLOAT | TP_CHAR | TP_BOOL | TP_VOID
+    TP_INT | TP_FLOAT | TP_BOOL
     ;
 
 
 // Estrutura if
 ifStmt: 
-    IF LEF_KEY expr RIG_PAR statement (ELSE statement)?
+    IF LEF_PAR expr RIG_PAR block (ELSE block)?
     ;
 
 
@@ -56,20 +56,24 @@ block:
 
 // Expressão seguida de ponto e vírgula
 exprStmt:
-    expr COLON
+    expr SEMICOL
     ;
 
 
 // Expressões com precedência no estilo C
 expr:
-    ID ASSIG expr                 # assignment                               
-    | ID LEF_PAR args? RIG_PAR #callFunct 
-    | LEF_PAR expr RIG_PAR #parens
-    | expr ('==' | '!=' | '<' | '>' | '<=' | '>=') expr  # comparison
-    | expr ('+' | '-') expr                     # additive
-    | expr ('*' | '/') expr                     # multiplicative
+    LEF_PAR expr RIG_PAR                        #parens
+    | ID LEF_PAR args? RIG_PAR                  #callFunct 
+    | SUB expr                                  # negation
+    | expr ( MULT | DIV ) expr                  # multiplicative
+    | expr ( SUM | SUB) expr                    # additive
+    | expr ( EQ | NE | LT | GT | LE | GE ) expr # comparison
+    | expr AND expr                             # and
+    | expr OR expr                              # or
+    | <assoc=right> ID ASSIG expr               # assignment
     | ID                                        # identifier
     | INT                                       # integerLiteral
+    | FLOAT                                     # floatLiteral
     | BOOL_LIT                                  # boolLiteral
     ;
 
@@ -90,13 +94,11 @@ param:
 
 
 returnStmt:
-    RETURN expr? COLON
+    RETURN expr? SEMICOL
     ;
 
 
 // ------------------- Lexer -------------------
-
-
 //ESTRUTURAS 
 IF    : 'si';
 ELSE  : 'sinon';
@@ -107,30 +109,52 @@ RETURN : 'retour';
 //TIPOS
 TP_INT   : 'int';
 TP_FLOAT : 'float';
-TP_CHAR  : 'char';
 TP_BOOL  : 'bool';
 TP_VOID : 'void';
 BOOL_LIT : 'vrai' | 'faux';
 
 
 //IDs
-ID  : [a-zA-Z_][a-zA-Z_0-9]* ;
+ID  : [a-zA-Z][a-zA-Z_0-9]* ;
 INT : [0-9]+ ;
 FLOAT : [0-9]+ '.' [0-9]+;
 
 
-//DELIMITADORES
+//ATRIBUIÇÃO
 ASSIG: '=';
+
+//ARITMÉTICOS
+SUM  : '+';
+SUB  : '-';
+MULT : '*';
+DIV  : '/';
+
+
+//RELACIONAIS
+EQ : '==';
+NE : '!=';
+LE : '<=';
+GE : '>=';
+LT : '<';
+GT : '>';
+
+
+//LÓGICOS 
+AND : '&&';
+OR  : '||';
+
+
+//DELIMITADORES
 LEF_PAR : '(';
 RIG_PAR : ')';
 LEF_KEY: '{';
 RIG_KEY: '}';
-COLON: ';';
+SEMICOL: ';';
 COMMA: ',';
 
 
 //TABULAÇÃO
-WS           : [ \t\r\n]+ -> skip ;
+WS : [ \t\r\n]+ -> skip ;
 
 
 //COMENTÁRIOS
