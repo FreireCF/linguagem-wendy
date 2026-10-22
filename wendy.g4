@@ -1,6 +1,5 @@
 grammar wendy;
 
-//est. repetição, est. condição, oper. lógico, oper. booleanos, declaração função 
 
 // Regra inicial: um programa é uma sequência de comandos
 program:
@@ -8,12 +7,13 @@ program:
     ;
 
 
+// Declaração de função; void só é permitido como tipo de retorno
 functDecl: 
     (type | TP_VOID) ID LEF_PAR params? RIG_PAR block
     ;
 
 
-// Um comando pode ser declaração de variável, if, while, bloco, expressão ou retornno
+// Um comando pode ser declaração de variável, if, while, bloco, expressão ou retorno
 statement:
     varDecl
     | ifStmt
@@ -30,7 +30,7 @@ varDecl:
     ;
 
 
-// Tipos básicos suportados
+// Tipos básicos de variáveis e parâmetros suportados
 type:
     TP_INT | TP_FLOAT | TP_BOOL
     ;
@@ -48,7 +48,7 @@ whileStmt:
     ;
 
 
-// Bloco delimitado por chaves
+// Bloco delimitado por chaves { comandos }
 block:
     LEF_KEY statement* RIG_KEY
     ;
@@ -78,11 +78,13 @@ expr:
     ;
 
 
+// Argumentos para chamada de função
 args:
     expr (COMMA expr)*
     ;
 
 
+// Parâmtros para declaração de função 
 params:
     param (COMMA param)*
     ;
@@ -93,6 +95,7 @@ param:
     ;
 
 
+//retorno de função 
 returnStmt:
     RETURN expr? SEMICOL
     ;
@@ -114,7 +117,7 @@ TP_VOID : 'void';
 BOOL_LIT : 'vrai' | 'faux';
 
 
-//IDs
+//IDENTIFICADORES
 ID  : [a-zA-Z][a-zA-Z_0-9]* ;
 INT : [0-9]+ ;
 FLOAT : [0-9]+ '.' [0-9]+;
@@ -153,10 +156,10 @@ SEMICOL: ';';
 COMMA: ',';
 
 
+
+//IGNORADOS
 //TABULAÇÃO
 WS : [ \t\r\n]+ -> skip ;
-
-
 //COMENTÁRIOS
 LINE_COMMENT : '//' ~[\r\n]* -> skip ;
 BLOCK_COMMENT : '/*' .*? '*/' -> skip ;

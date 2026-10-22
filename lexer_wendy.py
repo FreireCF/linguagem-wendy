@@ -95,46 +95,6 @@ DIGITOS = "0123456789"
 ESPACOS = " \t\r\n"
 
 # --- Palavras reservadas: lexema -> tipo ---------------------------
-# Reclassificadas a partir de tokens ID.
-PALAVRAS_RESERVADAS: dict[str, str] = {
-    "si":   "IF",
-    "sinon": "ELSE",
-    "tant": "WHILE",
-    "retour": "RETURN",
-}
-
-# --- Operadores compostos: lexema -> tipo --------------------------
-# Todos reconhecidos por um único AFD-trie ("FIXO").
-OPERADORES: dict[str, str] = {
-    "==": "EQ",
-    "!=": "NE",
-    "<=": "LE",
-    ">=": "GE",
-    "=": "ASSIG",
-    "<": "LT",
-    ">": "GT",
-    "+": "SUM",
-    "-": "SUB",
-    "*": "MULT",
-    "/": "DIV",
-    # "+=": "MAIS_IGUAL",
-    # "->": "SETA",
-}
-
-# --- Símbolos simples (1 caractere): lexema -> tipo ----------------
-DELIMITADORES: dict[str, str] = {
-    "(": "LEF_PAR",
-    ")": "RIG_PAR",
-    "{": "LEF_KEY",
-    "}": "RIG_KEY",
-    ";": "SEMICOL",
-    ",": "COMMA",
-}
-
-# --- Comentário 
-COMENT = "//"
-COMENT_BLOCK = ("/*", "*/")
-
 PALAVRAS_RESERVADAS: dict[str, str] = {
     # Estruturas
     "si":     "IF",
@@ -151,7 +111,8 @@ PALAVRAS_RESERVADAS: dict[str, str] = {
     "faux":   "BOOL_LIT",
 }
 
-
+# --- Operadores compostos: lexema -> tipo --------------------------
+# Todos reconhecidos por um único AFD-trie ("FIXO").
 OPERADORES: dict[str, str] = {
     # Atribuição 
     "=":  "ASSIG",
@@ -175,7 +136,7 @@ OPERADORES: dict[str, str] = {
     "||": "OR",
 }
 
-
+# --- Símbolos simples (1 caractere): lexema -> tipo ----------------
 DELIMITADORES: dict[str, str] = {
     "(": "LEF_PAR",
     ")": "RIG_PAR",
@@ -184,6 +145,11 @@ DELIMITADORES: dict[str, str] = {
     ";": "SEMICOL",
     ",": "COMMA",
 }
+
+# --- Comentário 
+COMENT = "//"
+COMENT_BLOCK = ("/*", "*/")
+
 
 # Tabela combinada (operadores + símbolos). Usada no trie e na
 # reclassificação. Não precisa editar.
@@ -372,6 +338,8 @@ class Lexer:
             elif self.entrada.startswith(abre_bloco, self.pos):
                 linha, coluna = self.linha, self.coluna
                 fim = self.entrada.find(fecha_bloco, self.pos + len(abre_bloco))
+                if fim == -1:
+                    raise SyntaxError(f"Comentário de bloco não fechado")
                 self._avancar(fim + len(fecha_bloco) - self.pos)
             else:
                 return
