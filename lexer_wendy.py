@@ -339,7 +339,7 @@ class Lexer:
                 linha, coluna = self.linha, self.coluna
                 fim = self.entrada.find(fecha_bloco, self.pos + len(abre_bloco))
                 if fim == -1:
-                    raise SyntaxError(f"Comentário de bloco não fechado")
+                    raise SyntaxError(f"Comentário de bloco não fechado em L{linha}:C{coluna}")
                 self._avancar(fim + len(fecha_bloco) - self.pos)
             else:
                 return
