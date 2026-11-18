@@ -1,0 +1,10 @@
+int cont;
+int total=9; 
+
+tant(cont<=total){
+    si(total==cont){
+        break;      //implementar break
+    } sinon {
+        cont = cont + 1;
+    }
+}

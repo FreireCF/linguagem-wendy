@@ -3,10 +3,6 @@ Uso:
     python lexer_aluno.py [arquivo]
 
 Ordem sugerida:
-  TODOs 1-3  : primitivas do AFD
-  TODOs 4-5  : construtores genéricos (literal, trie)
-  TODOs 6-7  : construtores específicos (ID, NUM)
-  TODOs 8-9  : motor do lexer
   Config     : palavras reservadas, operadores, símbolos, alfabeto
 
 """
@@ -209,21 +205,10 @@ def afd_conjunto_literais(nome: str, textos: list[str]) -> AFD:
     return afd
 
 
-# =====================================================================
 # 5. CONSTRUTORES ESPECÍFICOS — ID e NUM
-# ---------------------------------------------------------------------
-# Ajuste estes conforme a forma dos tokens da SUA linguagem.
-# =====================================================================
-
-
 def afd_identificador() -> AFD:
-    """[INICIAIS_ID][CONTINUACAO_ID]* -> tipo ID.
-
-    Usa as constantes da CONFIGURAÇÃO. Para permitir, por exemplo,
-    `$` no meio de identificadores, basta editar CONTINUACAO_ID.
-    """
     afd = AFD("ID")
-    # TODO 6:
+    
     q1 = afd.novo_estado()
     afd.transicao(afd.inicial, INICIAIS_ID, q1)
     afd.transicao(q1, CONTINUACAO_ID, q1)
@@ -232,12 +217,6 @@ def afd_identificador() -> AFD:
 
 
 def afd_numero() -> AFD:
-    """[DIGITOS]+ -> tipo NUM.
-
-    Para aceitar floats, adicione estados e transições para '.'
-    (ex.: 12.5) e para expoente 'e'/'E'.
-    Para hexadecimal, aceite o prefixo '0x' e A-F em DIGITOS.
-    """
     afd = AFD("NUM")
     q1 = afd.novo_estado()   # parte inteira 
     q2 = afd.novo_estado()   # leu o .
@@ -252,10 +231,7 @@ def afd_numero() -> AFD:
     return afd
 
 
-# =====================================================================
 # 6. LEXER
-# =====================================================================
-
 class Lexer:
     def __init__(self, entrada: str, regras: list[tuple[str, AFD]]):
         self.entrada = entrada
@@ -276,10 +252,6 @@ class Lexer:
             self.pos += 1
 
     def _reclassificar(self, tipo: str, valor: str) -> str:
-        """Refina o tipo bruto usando a CONFIGURAÇÃO:
-          - ID   -> palavra reservada, se aplicável
-          - FIXO -> operador ou símbolo específico
-        """
         if tipo == "ID" and valor in PALAVRAS_RESERVADAS:
             return PALAVRAS_RESERVADAS[valor]
         if tipo == "NUM":
@@ -368,16 +340,17 @@ def construir_regras() -> list[tuple[str, AFD]]:
 
 def main() -> None:
     if len(sys.argv) > 1:
-        with open(sys.argv[1], "r", encoding="utf-8") as f:
+        with open(sys.argv[1], "r") as f:
             codigo = f.read()
     else:
         codigo = sys.stdin.read()
-
     tokens = Lexer(codigo, construir_regras()).tokenizar()
 
-    # Sequência de tipos em uma linha, separados por espaço, para o ANTLR
+    with open("tokens.tsv", "w", encoding="utf-8") as f:
+        for tok in tokens:
+            f.write(f"{tok.valor}\t{tok.tipo}\n")
     print(" ".join(tok.tipo for tok in tokens))
-
-
+ 
+    
 if __name__ == "__main__":
     main()

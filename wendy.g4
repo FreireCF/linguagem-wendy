@@ -9,7 +9,7 @@ program:
 
 // Declaração de função; void só é permitido como tipo de retorno
 functDecl: 
-    (type | TP_VOID) ID LEF_PAR params? RIG_PAR block
+    varType ID LEF_PAR params? RIG_PAR block
     ;
 
 
@@ -26,13 +26,13 @@ statement:
 
 // Declaração de variável: tipo nome (= valor)? ;
 varDecl:
-    type ID (ASSIG expr)? SEMICOL
+    varType ID (ASSIG expr)? SEMICOL
     ;
 
 
-// Tipos básicos de variáveis e parâmetros suportados
-type:
-    TP_INT | TP_FLOAT | TP_BOOL
+// Tipos básicos de variáveis, retornos de funções e parâmetros suportados
+varType:
+    TP_INT | TP_FLOAT 
     ;
 
 
@@ -48,7 +48,7 @@ whileStmt:
     ;
 
 
-// Bloco delimitado por chaves { comandos }
+// Bloco delimitado por chaves { statement* }
 block:
     LEF_KEY statement* RIG_KEY
     ;
@@ -74,7 +74,6 @@ expr:
     | ID                                        # identifier
     | INT                                       # integerLiteral
     | FLOAT                                     # floatLiteral
-    | BOOL_LIT                                  # boolLiteral
     ;
 
 
@@ -91,7 +90,7 @@ params:
 
 
 param:
-    type ID
+    varType ID
     ;
 
 
@@ -112,9 +111,6 @@ RETURN : 'retour';
 //TIPOS
 TP_INT   : 'int';
 TP_FLOAT : 'float';
-TP_BOOL  : 'bool';
-TP_VOID : 'void';
-BOOL_LIT : 'vrai' | 'faux';
 
 
 //IDENTIFICADORES
