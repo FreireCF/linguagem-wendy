@@ -79,28 +79,13 @@ class wendyVisitor(ParseTreeVisitor):
         return self.visitChildren(ctx)
 
 
-    # Visit a parse tree produced by wendyParser#assignment.
-    def visitAssignment(self, ctx:wendyParser.AssignmentContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by wendyParser#multiplicative.
-    def visitMultiplicative(self, ctx:wendyParser.MultiplicativeContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by wendyParser#boolLiteral.
-    def visitBoolLiteral(self, ctx:wendyParser.BoolLiteralContext):
-        return self.visitChildren(ctx)
-
-
-    # Visit a parse tree produced by wendyParser#additive.
-    def visitAdditive(self, ctx:wendyParser.AdditiveContext):
-        return self.visitChildren(ctx)
-
-
     # Visit a parse tree produced by wendyParser#callFunct.
     def visitCallFunct(self, ctx:wendyParser.CallFunctContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by wendyParser#assignment.
+    def visitAssignment(self, ctx:wendyParser.AssignmentContext):
         return self.visitChildren(ctx)
 
 
@@ -116,6 +101,16 @@ class wendyVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by wendyParser#floatLiteral.
     def visitFloatLiteral(self, ctx:wendyParser.FloatLiteralContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by wendyParser#multiplicative.
+    def visitMultiplicative(self, ctx:wendyParser.MultiplicativeContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by wendyParser#additive.
+    def visitAdditive(self, ctx:wendyParser.AdditiveContext):
         return self.visitChildren(ctx)
 
 
@@ -136,6 +131,11 @@ class wendyVisitor(ParseTreeVisitor):
 
     # Visit a parse tree produced by wendyParser#returnStmt.
     def visitReturnStmt(self, ctx:wendyParser.ReturnStmtContext):
+        return self.visitChildren(ctx)
+
+
+    # Visit a parse tree produced by wendyParser#breakStmt.
+    def visitBreakStmt(self, ctx:wendyParser.BreakStmtContext):
         return self.visitChildren(ctx)
 
 
