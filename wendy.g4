@@ -21,6 +21,7 @@ statement:
     | block
     | exprStmt
     | returnStmt
+    | breakStmt
     ;
 
 
@@ -99,6 +100,10 @@ returnStmt:
     RETURN expr? SEMICOL
     ;
 
+breakStmt: 
+    BREAK SEMICOL
+;
+
 
 // ------------------- Lexer -------------------
 //ESTRUTURAS 
@@ -106,6 +111,7 @@ IF    : 'si';
 ELSE  : 'sinon';
 WHILE  :  'tant';
 RETURN : 'retour';
+BREAK : 'casser';
 
 
 //TIPOS

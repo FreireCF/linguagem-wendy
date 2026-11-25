@@ -1,9 +1,11 @@
-int cont;
-int total=9; 
+float cont = 3.4;
+float i = cont;
+int total = 002;
 
 tant(cont<=total){
-    si(total==cont){
-        break;      //implementar break
+    si(total==cont && cont>0){
+        int i = 0;
+        casser;      //implementar casser (break)
     } sinon {
         cont = cont + 1;
     }

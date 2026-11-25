@@ -1,19 +1,10 @@
-"""
-Uso:
-    python lexer_aluno.py [arquivo]
+#Uso: python lexer_aluno.py [arquivo]
 
-Ordem sugerida:
-  Config     : palavras reservadas, operadores, símbolos, alfabeto
-
-"""
 from __future__ import annotations
 from dataclasses import dataclass
 import sys
 
-# =====================================================================
 # 1. TOKEN
-# =====================================================================
-
 @dataclass
 class Token:
     tipo: str
@@ -25,13 +16,9 @@ class Token:
         return f"<{self.tipo}, {self.valor!r}> @ {self.linha}:{self.coluna}"
 
 
-# =====================================================================
 # 2. AFD — tabela de transições
-# =====================================================================
-
 class AFD:
-    """AFD representado por tabela (estado, símbolo) -> estado."""
-
+    #AFD representado por tabela (estado, símbolo) -> estado.
     def __init__(self, nome: str):
         self.nome = nome
         self.transicoes: dict[tuple[int, str], int] = {}
@@ -45,21 +32,13 @@ class AFD:
         return e
 
     def transicao(self, origem: int, simbolos: str, destino: int) -> None:
-        """TODO 1: para CADA caractere c em `simbolos`, registre
-        transicoes[(origem, c)] = destino."""
         for c in simbolos:
             self.transicoes[(origem, c)] = destino
-        #raise NotImplementedError
 
     def marcar_final(self, estado: int) -> None:
-        """Adiciona `estado` ao conjunto de estados finais."""
         self.finais.add(estado)
-        #raise NotImplementedError
 
     def maior_prefixo(self, texto: str) -> int:
-        """Retorna o comprimento do MAIOR prefixo de `texto`
-        aceito pelo AFD, ou -1 se nenhum prefixo for aceito.
-        """
         estado = self.inicial
         ultimo = 0 if estado in self.finais else -1
         for i, c in enumerate(texto):
@@ -71,44 +50,35 @@ class AFD:
                 ultimo = i + 1
         return ultimo
     
-        #raise NotImplementedError
 
-
-# =====================================================================
 # 3. CONFIGURAÇÃO DA LINGUAGEM
-# ---------------------------------------------------------------------
-# =====================================================================
 
-# --- Alfabeto de identificadores -----------------------------------
+# Alfabeto de identificadores 
 LETRAS_ID       = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 INICIAIS_ID     = LETRAS_ID                # 1º caractere
 CONTINUACAO_ID  = LETRAS_ID + "0123456789_"      # caracteres seguintes
 
-# --- Dígitos (para números) -----------------------------------------
+# Dígitos 
 DIGITOS = "0123456789"
 
-# --- Espaços em branco ignorados ------------------------------------
+# Espaços em branco ignorados 
 ESPACOS = " \t\r\n"
 
-# --- Palavras reservadas: lexema -> tipo ---------------------------
+# Palavras reservadas: lexema -> token 
 PALAVRAS_RESERVADAS: dict[str, str] = {
     # Estruturas
     "si":     "IF",
     "sinon":  "ELSE",
     "tant":   "WHILE",
     "retour": "RETURN",
+    "casser": "BREAK",
     
-    # Tipos primitivos e  literais
+    # Tipos primitivos 
     "int":    "TP_INT",
     "float":  "TP_FLOAT",
     "void":   "TP_VOID",
-    "bool":   "TP_BOOL",
-    "vrai":   "BOOL_LIT",
-    "faux":   "BOOL_LIT",
 }
 
-# --- Operadores compostos: lexema -> tipo --------------------------
-# Todos reconhecidos por um único AFD-trie ("FIXO").
 OPERADORES: dict[str, str] = {
     # Atribuição 
     "=":  "ASSIG",
@@ -170,7 +140,6 @@ def afd_literal(nome: str, texto: str) -> AFD:
     O estado correspondente ao texto completo é o único final.
     """
     afd = AFD(nome)
-    # TODO 4:
     atual = afd.inicial
     for c in texto:
         prox = afd.novo_estado()
@@ -190,9 +159,6 @@ def afd_conjunto_literais(nome: str, textos: list[str]) -> AFD:
     depois, olhando o valor reconhecido.
     """
     afd = AFD(nome)
-    # TODO 5: para cada texto, desça no trie a partir de afd.inicial;
-    #         crie estados quando não houver transição; marque o nó
-    #         final de cada texto.
     for texto in textos:
         atual = afd.inicial
         for c in texto:
@@ -205,7 +171,7 @@ def afd_conjunto_literais(nome: str, textos: list[str]) -> AFD:
     return afd
 
 
-# 5. CONSTRUTORES ESPECÍFICOS — ID e NUM
+# 5. CONSTRUTORES ESPECÍFICOS — id, int e float 
 def afd_identificador() -> AFD:
     afd = AFD("ID")
     
@@ -216,8 +182,18 @@ def afd_identificador() -> AFD:
     return afd
 
 
-def afd_numero() -> AFD:
-    afd = AFD("NUM")
+
+def afd_int() -> AFD:
+    afd = AFD("INT")
+    q1 = afd.novo_estado()   # parte inteira 
+    afd.transicao(afd.inicial, DIGITOS, q1)
+    afd.transicao(q1, DIGITOS, q1)
+    afd.marcar_final(q1)
+    return afd
+
+
+def afd_float() -> AFD:
+    afd = AFD("FLOAT")
     q1 = afd.novo_estado()   # parte inteira 
     q2 = afd.novo_estado()   # leu o .
     q3 = afd.novo_estado()   # parte decimal
@@ -226,7 +202,6 @@ def afd_numero() -> AFD:
     afd.transicao(q1, ".", q2)
     afd.transicao(q2, DIGITOS, q3)
     afd.transicao(q3, DIGITOS, q3)
-    afd.marcar_final(q1)
     afd.marcar_final(q3)
     return afd
 
@@ -253,11 +228,9 @@ class Lexer:
 
     def _reclassificar(self, tipo: str, valor: str) -> str:
         if tipo == "ID" and valor in PALAVRAS_RESERVADAS:
-            return PALAVRAS_RESERVADAS[valor]
-        if tipo == "NUM":
-            return "FLOAT" if "." in valor else "INT" # sempre existe
+            return PALAVRAS_RESERVADAS[valor] 
         if tipo == "FIXO":
-            return FIXOS[valor]         # sempre existe
+            return FIXOS[valor]         
         return tipo
 
     def proximo_token(self) -> Token | None:
@@ -333,7 +306,8 @@ def construir_regras() -> list[tuple[str, AFD]]:
     """
     return [
         ("ID",   afd_identificador()),
-        ("NUM",  afd_numero()),
+        ("INT",  afd_int()),
+        ("FLOAT", afd_float()),
         ("FIXO", afd_conjunto_literais("FIXO", sorted(FIXOS))),
     ]
 

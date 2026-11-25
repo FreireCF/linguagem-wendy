@@ -1,8 +1,8 @@
 import sys
 
 from antlr4 import FileStream, CommonTokenStream
-from WendyLexer import WendyLexer
-from WendyParser import WendyParser
+from wendyLexer import wendyLexer
+from wendyParser import wendyParser
 from semanticVisitor import SemanticVisitor
 
 
@@ -13,20 +13,20 @@ def main():
 
     arquivo = sys.argv[1]
 
-    #análise léxica
+    #léxica
     entrada = FileStream(arquivo, encoding="utf-8")
-    lexer = WendyLexer(entrada)
+    lexer = wendyLexer(entrada)
     tokens = CommonTokenStream(lexer)
 
-    #analise sintática
-    parser = WendyParser(tokens)
+    #sintática
+    parser = wendyParser(tokens)
     arvore = parser.program()
 
     if parser.getNumberOfSyntaxErrors() > 0:
         print("\nAnálise semântica não executada: existem erros sintáticos.")
         return
 
-    #análise semântica
+    #semântica
     visitor = SemanticVisitor()
     visitor.visit(arvore)
 
